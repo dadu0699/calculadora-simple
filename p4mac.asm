@@ -1,9 +1,11 @@
 print macro str
     LOCAL ETIQUETAPRINT
+    almacenar
     ETIQUETAPRINT:
         mov ah,09h
         mov dx, offset str
         int 21h
+    desalmanecar
 endm
 
 getChr macro
@@ -13,6 +15,7 @@ endm
 
 getString macro buffer
     LOCAL COCAT, TERM, DELSPACE
+    almacenar
 
     xor si, si
     COCAT:
@@ -34,10 +37,12 @@ getString macro buffer
     TERM:
         mov al, '$'
         mov buffer[si], al
+    desalmanecar
 endm
 
 parseString macro buffer
     LOCAL RestartSplit, Split, ConcatParse, FinParse, Negativo
+    almacenar
     xor si, si
 	xor cx, cx
 	xor bx, bx
@@ -75,9 +80,11 @@ parseString macro buffer
 		inc si
 
 	FinParse:
+    desalmanecar
 endm
 
 equalsString macro buffer, command, etq
+    almacenar
     mov ax, ds
     mov es, ax
     mov cx, 5   ;Cantidad de caracateres a comparar
@@ -85,11 +92,13 @@ equalsString macro buffer, command, etq
     lea si, buffer
     lea di, command
     repe cmpsb
+    desalmanecar
     je etq
 endm
 
 convertAscii macro numero
 	LOCAL convI, finA
+    almacenar
 	xor ax, ax
 	xor bx, bx
 	xor cx, cx
@@ -108,11 +117,12 @@ convertAscii macro numero
 		add ax, cx
 		jmp convI
 	finA:
+    desalmanecar
 endm
 
 getInteger macro buffer
 	LOCAL IniciInt, FinInt
-
+    almacenar
 	xor si, si
 	IniciInt:
 		getChr
@@ -124,10 +134,12 @@ getInteger macro buffer
 
 	FinInt:
 		mov buffer[si], 00h
+    desalmanecar
 endm
 
 clearString macro buffer
     LOCAL RestartClear
+    almacenar
 
     xor si, si
     xor cx, cx
@@ -137,6 +149,7 @@ clearString macro buffer
         mov buffer[si], '$'
         inc si
     loop RestartClear
+    desalmanecar
 endm
 
 ;-------------------------------------------------------------------------------------
@@ -236,9 +249,10 @@ forArray macro buffer
         jmp CONTINUARC
 
     CONTINUARC: 
-        inc si
         cmp dh, '$'
         je FINC
+
+        inc si
         jmp CICLO
 
     IDS:
@@ -257,6 +271,7 @@ forArray macro buffer
         jmp IDS
 
     SAVEID:
+        xor cx, cx
         xor ax, ax
         mov ah, auxiliar
         PUSH ax
@@ -269,4 +284,22 @@ forArray macro buffer
         jmp CICLO
 
     FINC:
+endm
+
+almacenar macro
+    push ax
+    push bx
+    push cx
+    push dx
+    push si
+    push di
+endm
+
+desalmanecar macro                  
+    pop di
+    pop si
+    pop dx
+    pop cx
+    pop bx
+    pop ax
 endm

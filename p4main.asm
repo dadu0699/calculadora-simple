@@ -40,7 +40,9 @@ msgCloseError    db 0ah,0dh,20h,20h,  'ERROR: NO SE PUDO CERRAR EL ARCHIVO', '$'
 
 bufferContenidoJSON db 10000 dup('$')
 auxiliar db 50 dup('$')
-aux db 50 dup('$')
+numeroU db 00h, '$'
+numeroD db 00h, '$'
+signo   db 00h, '$'
 handleFile dw ?
 ; FIN SECCION DE DATOS 
 
