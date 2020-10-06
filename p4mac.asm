@@ -12,15 +12,23 @@ getChr macro
 endm
 
 getString macro buffer
-    LOCAL COCAT, TERM
+    LOCAL COCAT, TERM, DELSPACE
 
-    xor si,si
+    xor si, si
     COCAT:
         getChr
         cmp al, 0dh
         je TERM
+        cmp al, 08h
+        je DELSPACE
         mov buffer[si], al
         inc si
+        jmp COCAT
+
+    DELSPACE:
+        mov al, 24h
+        dec si
+        mov buffer[si], al
         jmp COCAT
 
     TERM:
@@ -28,19 +36,132 @@ getString macro buffer
         mov buffer[si], al
 endm
 
+parseString macro buffer
+    LOCAL RestartSplit, Split, ConcatParse, FinParse, Negativo
+    xor si, si
+	xor cx, cx
+	xor bx, bx
+	xor dx, dx
+	mov dl, 0ah
+	test ax, 1000000000000000
+    jnz Negativo
+	jmp Split
 
+    Negativo:
+        neg ax
+        mov buffer[si], 45
+        inc si
+        jmp Split
 
+	RestartSplit:
+		xor ah,ah
+
+	Split:
+		div dl
+		inc cx
+		push ax
+		cmp al, 00h
+		je ConcatParse
+		jmp RestartSplit
+
+	ConcatParse:
+		pop ax
+		add ah, 30h
+		mov buffer[si], ah
+		inc si
+		loop ConcatParse
+		mov ah, 24h
+		mov buffer[si], ah
+		inc si
+
+	FinParse:
+endm
+
+equalsString macro buffer, command, etq
+    mov ax, ds
+    mov es, ax
+    mov cx, 5   ;Cantidad de caracateres a comparar
+    
+    lea si, buffer
+    lea di, command
+    repe cmpsb
+    je etq
+endm
+
+convertAscii macro numero
+	LOCAL convI, finA
+	xor ax, ax
+	xor bx, bx
+	xor cx, cx
+	mov bx, 10
+	xor si, si
+
+	convI:
+		mov cl, numero[si] 
+		cmp cl, 48
+		jl finA
+		cmp cl, 57
+		jg finA
+		inc si
+		sub cl, 48
+		mul bx
+		add ax, cx
+		jmp convI
+	finA:
+endm
+
+getInteger macro buffer
+	LOCAL IniciInt, FinInt
+
+	xor si, si
+	IniciInt:
+		getChr
+		cmp al, 0dh
+		je FinInt
+		mov buffer[si], al
+		inc si
+		jmp IniciInt
+
+	FinInt:
+		mov buffer[si], 00h
+endm
+
+clearString macro buffer
+    LOCAL RestartClear
+
+    xor si, si
+    xor cx, cx
+    mov cx, SIZEOF buffer
+    
+    RestartClear:
+        mov buffer[si], '$'
+        inc si
+    loop RestartClear
+endm
+
+;-------------------------------------------------------------------------------------
+; MACROS ARCHIVOS
+;-------------------------------------------------------------------------------------
 getPathFile macro buffer
-    LOCAL CONCATENAR, TERMINAR
+    LOCAL CONCATENAR, TERMINAR, ELIMINARESPACIO
     
     xor si, si
     CONCATENAR:
         getChr
         cmp al, 0dh
         je TERMINAR
+        cmp al, 08h
+        je ELIMINARESPACIO
         mov buffer[si], al
         inc si
         jmp CONCATENAR
+
+    ELIMINARESPACIO:
+        mov al, 24h
+        dec si
+        mov buffer[si], al
+        jmp CONCATENAR
+
     TERMINAR:
         mov buffer[si], 00h
 endm
@@ -91,6 +212,7 @@ closeFile macro handle
     mov ah, 3eh
     mov handle, bx
     int 21h
+    jc CloseError
 endm
 
 deleteFile macro buffer
@@ -101,10 +223,50 @@ endm
 
 
 
-;clearArray macro buffer
-;    xor ax, ax
-;    mov cx, SIZEOF buffer
-;    mov di, buffer
-;    cld
-;    rep stosb
-;endm
+forArray macro buffer
+    LOCAL CICLO, CONTINUARC, FINC, IDS, SAVEID
+
+    xor si, si
+    xor cx, cx
+    
+    CICLO:
+        mov dh, buffer[si]        
+        cmp dh, 22h
+        je IDS
+        jmp CONTINUARC
+
+    CONTINUARC: 
+        inc si
+        cmp dh, '$'
+        je FINC
+        jmp CICLO
+
+    IDS:
+        inc si
+        mov dh, buffer[si]
+        cmp dh, 22h
+        je SAVEID
+
+        PUSH si
+        xor si, si
+        mov si, cx
+        mov auxiliar[si], dh
+        inc cx
+        POP si
+
+        jmp IDS
+
+    SAVEID:
+        xor ax, ax
+        mov ah, auxiliar
+        PUSH ax
+
+        print auxiliar
+        clearString auxiliar
+        getChr
+
+        inc si
+        jmp CICLO
+
+    FINC:
+endm

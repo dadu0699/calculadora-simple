@@ -36,8 +36,11 @@ msgCreationError db 0ah,0dh,20h,20h,  'ERROR: NO SE PUDO CREAR EL ARCHIVO', '$'
 msgWritingError  db 0ah,0dh,20h,20h,  'ERROR: NO SE PUDO ESCRIBIR EN EL ARCHIVO', '$'
 msgDeleteError   db 0ah,0dh,20h,20h,  'ERROR: NO SE PUDO ELIMINAR EL ARCHIVO', '$'
 msgReadingError  db 0ah,0dh,20h,20h,  'ERROR: NO SE PUDO LEER EL ARCHIVO', '$'
+msgCloseError    db 0ah,0dh,20h,20h,  'ERROR: NO SE PUDO CERRAR EL ARCHIVO', '$'
 
 bufferContenidoJSON db 10000 dup('$')
+auxiliar db 50 dup('$')
+aux db 50 dup('$')
 handleFile dw ?
 ; FIN SECCION DE DATOS 
 
@@ -66,18 +69,17 @@ handleFile dw ?
             jmp MENU
         
         CARGAR:
+            clearString path
+            clearString bufferContenidoJSON
+
             print msgCarg
             print getPath
             getPathFile path
             openFile path, handleFile
             readFile SIZEOF bufferContenidoJSON, bufferContenidoJSON , handleFile
             closeFile handleFile
-            print bufferContenidoJSON
 
-            ;clearArray bufferContenidoJSON
-            ;clearArray path
-            ;print bufferContenidoJSON
-            ;print path
+            forArray bufferContenidoJSON
             jmp MENU
 
         CONSOLA:
@@ -112,6 +114,11 @@ handleFile dw ?
 
         DeleteError:
 	    	print msgDeleteError
+	    	getChr
+	    	jmp MENU
+
+        CloseError:
+	    	print msgCloseError
 	    	getChr
 	    	jmp MENU
     main endp
