@@ -5,7 +5,7 @@ print macro str
         mov ah,09h
         mov dx, offset str
         int 21h
-    desalmanecar
+    desalmacenar
 endm
 
 getChr macro
@@ -37,7 +37,7 @@ getString macro buffer
     TERM:
         mov al, '$'
         mov buffer[si], al
-    desalmanecar
+    desalmacenar
 endm
 
 parseString macro buffer
@@ -80,7 +80,7 @@ parseString macro buffer
 		inc si
 
 	FinParse:
-    desalmanecar
+    desalmacenar
 endm
 
 equalsString macro buffer, command, etq
@@ -92,7 +92,7 @@ equalsString macro buffer, command, etq
     lea si, buffer
     lea di, command
     repe cmpsb
-    desalmanecar
+    desalmacenar
     je etq
 endm
 
@@ -117,12 +117,11 @@ convertAscii macro numero
 		add ax, cx
 		jmp convI
 	finA:
-    desalmanecar
+    desalmacenar
 endm
 
 getInteger macro buffer
 	LOCAL IniciInt, FinInt
-    almacenar
 	xor si, si
 	IniciInt:
 		getChr
@@ -134,7 +133,6 @@ getInteger macro buffer
 
 	FinInt:
 		mov buffer[si], 00h
-    desalmanecar
 endm
 
 clearString macro buffer
@@ -149,7 +147,7 @@ clearString macro buffer
         mov buffer[si], '$'
         inc si
     loop RestartClear
-    desalmanecar
+    desalmacenar
 endm
 
 ;-------------------------------------------------------------------------------------
@@ -234,7 +232,88 @@ deleteFile macro buffer
     jc DeleteError
 endm
 
+;-------------------------------------------------------------------------------------
+; MACROS REPORTES
+;-------------------------------------------------------------------------------------
+generateReport macro 
+    getDate
+    getTime
 
+    deleteFile pathFile
+    createFile pathFile, handleFile
+    openFile pathFile, handleFile
+
+    writingFile SIZEOF alumnoJSON, alumnoJSON, handleFile
+    writingFile SIZEOF fechaDiaJSON, fechaDiaJSON, handleFile
+    writingFile SIZEOF fechaDia, fechaDia, handleFile
+    writingFile SIZEOF fechaMesJSON, fechaMesJSON, handleFile
+    writingFile SIZEOF fechaMes, fechaMes, handleFile
+    writingFile SIZEOF fechaAnioJSON, fechaAnioJSON, handleFile
+    writingFile SIZEOF horaHoraJSON, horaHoraJSON, handleFile
+    writingFile SIZEOF fechaHora, fechaHora, handleFile
+    writingFile SIZEOF horaMinutosJSON, horaMinutosJSON, handleFile
+    writingFile SIZEOF fechaMinutos, fechaMinutos, handleFile
+    writingFile SIZEOF horaSegundosJSON, horaSegundosJSON, handleFile
+    writingFile SIZEOF fechaSegundos, fechaSegundos, handleFile
+    writingFile SIZEOF resultsMediaJSON, resultsMediaJSON, handleFile
+    writingFile SIZEOF resMedia, resMedia, handleFile
+    writingFile SIZEOF resultsMedianaJSON, resultsMedianaJSON, handleFile
+    writingFile SIZEOF resMediana, resMediana, handleFile
+    writingFile SIZEOF resultsModaJSON, resultsModaJSON, handleFile
+    writingFile SIZEOF resModa, resModa, handleFile
+    writingFile SIZEOF resultsMenorJSON, resultsMenorJSON, handleFile
+    writingFile SIZEOF resMenor, resMenor, handleFile
+    writingFile SIZEOF resultsMayorJSON, resultsMayorJSON, handleFile
+    writingFile SIZEOF resMayor, resMayor, handleFile
+    writingFile SIZEOF operacionesJSON, operacionesJSON, handleFile
+    
+    writingFile SIZEOF operaciones1JSON, operaciones1JSON, handleFile
+    writingFile SIZEOF operaciones2JSON, operaciones2JSON, handleFile
+
+    writingFile SIZEOF cierreJSON, cierreJSON, handleFile
+
+    closeFile handleFile
+endm
+
+getDate macro
+    almacenar
+    mov ah,2ah
+    int 21h
+    
+    mov al, dl
+    call conv
+    mov fechaDia[0], ah
+    mov fechaDia[1], al
+
+    mov al, dh
+    call conv
+    mov fechaMes[0], ah
+    mov fechaMes[1], al
+    desalmacenar
+endm
+
+getTime macro
+    almacenar
+    mov ah,2ch
+    int 21h
+
+    mov al, ch
+    call conv
+    mov fechaHora[0], ah
+    mov fechaHora[1], al
+
+    mov al, cl
+    call conv
+    mov fechaMinutos[0], ah
+    mov fechaMinutos[1], al
+
+    mov al, dh
+    call conv
+    mov fechaSegundos[0], ah
+    mov fechaSegundos[1], al
+
+    desalmacenar
+endm
 
 forArray macro buffer
     LOCAL CICLO, CONTINUARC, FINC, IDS, SAVEID
@@ -276,9 +355,9 @@ forArray macro buffer
         mov ah, auxiliar
         PUSH ax
 
-        print auxiliar
-        clearString auxiliar
-        getChr
+        ; print auxiliar
+        ; clearString auxiliar
+        ; getChr
 
         inc si
         jmp CICLO
@@ -287,19 +366,19 @@ forArray macro buffer
 endm
 
 almacenar macro
-    push ax
-    push bx
-    push cx
-    push dx
-    push si
-    push di
+    PUSH ax
+    PUSH bx
+    PUSH cx
+    PUSH dx
+    PUSH si
+    PUSH di
 endm
 
-desalmanecar macro                  
-    pop di
-    pop si
-    pop dx
-    pop cx
-    pop bx
-    pop ax
+desalmacenar macro                  
+    POP di
+    POP si
+    POP dx
+    POP cx
+    POP bx
+    POP ax
 endm

@@ -44,6 +44,35 @@ numeroU db 00h, '$'
 numeroD db 00h, '$'
 signo   db 00h, '$'
 handleFile dw ?
+
+alumnoJSON db '{', 0ah,0dh,09h, '"reporte": {', 0ah,0dh,09h,09h, '"alumno": {', 0ah,0dh,09h,09h,09h, '"Nombre": "Didier Alfredo Domínguez Urías",',  0ah,0dh,09h,09h,09h, '"Carnet": 201801266,', 0ah,0dh,09h,09h,09h, '"Seccion": "A",', 0ah,0dh,09h,09h,09h, '"Curso": "Arquitectura de Computadoras y Ensambladores 1"', 0ah,0dh,09h,09h, '},'                                         
+fechaDiaJSON db  0ah,0dh,09h,09h, '"fecha": {', 0ah,0dh,09h,09h,09h, '"Dia": '
+fechaMesJSON db  ',', 0ah,0dh,09h,09h,09h, '"Mes": '
+fechaAnioJSON db  ',', 0ah,0dh,09h,09h,09h, '"Año": 2020'
+horaHoraJSON db  0ah,0dh,09h,09h, '},', 0ah,0dh,09h,09h, '"hora": {', 0ah,0dh,09h,09h,09h, '"Hora": '
+horaMinutosJSON db  ',', 0ah,0dh,09h,09h,09h, '"Minutos": '
+horaSegundosJSON db  ',', 0ah,0dh,09h,09h,09h, '"Segundos": '
+resultsMediaJSON db  0ah,0dh,09h,09h, '},', 0ah,0dh,09h,09h, '"resultados": {', 0ah,0dh,09h,09h,09h, '"Media": '
+resultsMedianaJSON db  ',', 0ah,0dh,09h,09h,09h, '"Mediana": '
+resultsModaJSON db  ',', 0ah,0dh,09h,09h,09h, '"Moda": '
+resultsMenorJSON db  ',', 0ah,0dh,09h,09h,09h, '"Menor": '
+resultsMayorJSON db  ',', 0ah,0dh,09h,09h,09h, '"Mayor": '
+operacionesJSON db  0ah,0dh,09h,09h, '},', 0ah,0dh,09h,09h, '"operaciones": ['
+operaciones1JSON db 0ah,0dh,09h,09h,09h, '{', 0ah,0dh,09h,09h,09h,09h
+operaciones2JSON db 0ah,0dh,09h,09h,09h, '},'
+cierreJSON db  0ah,0dh,09h,09h, ']', 0ah,0dh,09h, '}', 0ah,0dh, '}'
+
+fechaDia db 'dd'
+fechaMes db 'mm'
+fechaHora db 'hh'
+fechaMinutos db 'mm'
+fechaSegundos db 'ss'
+resMedia db '#'
+resMediana db '#'
+resModa db '#'
+resMenor db '#'
+resMayor db '#'
+pathFile db 'rep.jso', 00h
 ; FIN SECCION DE DATOS 
 
 .code ;SEGMENTO DE CODIGO
@@ -71,6 +100,8 @@ handleFile dw ?
             jmp MENU
         
         CARGAR:
+            generateReport
+
             clearString path
             clearString bufferContenidoJSON
 
@@ -125,4 +156,14 @@ handleFile dw ?
 	    	jmp MENU
     main endp
 ; FIN SECCION DE CODIGO
+
+
+
+
+
+    conv proc 
+        AAM
+        ADD ax, 3030h
+        ret
+    conv endp
 end

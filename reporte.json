@@ -1,0 +1,36 @@
+{
+    "reporte": {
+        "alumno": {
+            "Nombre": "Didier Alfredo Domínguez Urías",
+            "Carnet": 201801266,
+            "Seccion": "A",
+            "Curso": "Arquitectura de Computadoras y Ensambladores 1"
+        },
+        "fecha": {
+            "Dia": 22,
+            "Mes": 1,
+            "Año": 2018
+        },
+        "hora": {
+            "Hora": 12,
+            "Minutos": 20,
+            "Segundos": 0
+        },
+        "resultados": {
+            "media": 48,
+            "mediana": 82,
+            "moda": "No hay",
+            "menor": -30,
+            "mayor": 92
+        },
+        "operaciones": [{
+                "operacion1": 92
+            },
+            {
+                "operacion2": 82
+            }, {
+                "operacion3": -30
+            }
+        ]
+    }
+}
