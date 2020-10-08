@@ -72,7 +72,8 @@ resMediana db '#'
 resModa db '#'
 resMenor db '#'
 resMayor db '#'
-pathFile db 'rep.jso', 00h
+pathFile db 50 dup('$')
+pathBool db 48
 ; FIN SECCION DE DATOS 
 
 .code ;SEGMENTO DE CODIGO
@@ -100,9 +101,8 @@ pathFile db 'rep.jso', 00h
             jmp MENU
         
         CARGAR:
-            generateReport
-
             clearString path
+            clearString pathFile
             clearString bufferContenidoJSON
 
             print msgCarg
@@ -113,6 +113,7 @@ pathFile db 'rep.jso', 00h
             closeFile handleFile
 
             forArray bufferContenidoJSON
+            ; generateReport
             jmp MENU
 
         CONSOLA:

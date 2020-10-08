@@ -315,11 +315,15 @@ getTime macro
     desalmacenar
 endm
 
+;-------------------------------------------------------------------------------------
+; MACROS ANALIZIS Y OPERACIONES
+;-------------------------------------------------------------------------------------
 forArray macro buffer
-    LOCAL CICLO, CONTINUARC, FINC, IDS, SAVEID
+    LOCAL CICLO, CONTINUARC, FINC, IDS, SAVEID, GUARDARPADRE, GUARDARPLOOP, FINLOOPGP
 
     xor si, si
     xor cx, cx
+    mov [pathBool], 48
     
     CICLO:
         mov dh, buffer[si]        
@@ -355,16 +359,45 @@ forArray macro buffer
         mov ah, auxiliar
         PUSH ax
 
-        ; print auxiliar
-        ; clearString auxiliar
-        ; getChr
+        cmp [pathBool], 48
+		je GUARDARPADRE
+
+        ;print auxiliar
+        clearString auxiliar
+        ;getChr
 
         inc si
         jmp CICLO
 
+    GUARDARPADRE:
+        almacenar
+        xor si, si
+        GUARDARPLOOP:
+            mov dh, auxiliar[si]
+            cmp dh, '$'
+                je FINLOOPGP
+            mov pathFile[si], dh
+            inc si
+            jmp GUARDARPLOOP
+        FINLOOPGP:
+            inc si
+            mov pathFile[si], 00h
+            mov [pathBool], 49
+            
+            ;print auxiliar
+            ;print ln
+            ; print pathFile
+        desalmacenar
+
+        clearString auxiliar
+        inc si
+        jmp CICLO
     FINC:
 endm
 
+;-------------------------------------------------------------------------------------
+; MACROS ALMACENAMIENTO
+;-------------------------------------------------------------------------------------
 almacenar macro
     PUSH ax
     PUSH bx
