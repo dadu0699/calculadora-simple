@@ -57,8 +57,8 @@ resultsMedianaJSON db  ',', 0ah,0dh,09h,09h,09h, '"Mediana": '
 resultsModaJSON db  ',', 0ah,0dh,09h,09h,09h, '"Moda": '
 resultsMenorJSON db  ',', 0ah,0dh,09h,09h,09h, '"Menor": '
 resultsMayorJSON db  ',', 0ah,0dh,09h,09h,09h, '"Mayor": '
-operacionesJSON db  0ah,0dh,09h,09h, '},', 0ah,0dh,09h,09h, '"operaciones": ['
-operaciones1JSON db 0ah,0dh,09h,09h,09h, '{', 0ah,0dh,09h,09h,09h,09h
+operacionesJSON db  0ah,0dh,09h,09h, '},', 0ah,0dh,09h,09h, '"'
+operaciones1JSON db '": [', 0ah,0dh,09h,09h,09h, '{', 0ah,0dh,09h,09h,09h,09h
 operaciones2JSON db 0ah,0dh,09h,09h,09h, '},'
 cierreJSON db  0ah,0dh,09h,09h, ']', 0ah,0dh,09h, '}', 0ah,0dh, '}'
 
@@ -73,6 +73,7 @@ resModa db '#'
 resMenor db '#'
 resMayor db '#'
 pathFile db 50 dup('$')
+nameParent db 30 dup(' ')
 pathBool db 48
 ; FIN SECCION DE DATOS 
 

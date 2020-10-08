@@ -267,6 +267,7 @@ generateReport macro
     writingFile SIZEOF resMayor, resMayor, handleFile
     writingFile SIZEOF operacionesJSON, operacionesJSON, handleFile
     
+    writingFile SIZEOF nameParent, nameParent, handleFile
     writingFile SIZEOF operaciones1JSON, operaciones1JSON, handleFile
     writingFile SIZEOF operaciones2JSON, operaciones2JSON, handleFile
 
@@ -377,15 +378,23 @@ forArray macro buffer
             cmp dh, '$'
                 je FINLOOPGP
             mov pathFile[si], dh
+            mov nameParent[si], dh
             inc si
             jmp GUARDARPLOOP
         FINLOOPGP:
+            mov pathFile[si], '.'
+            inc si
+            mov pathFile[si], 'j'
+            inc si
+            mov pathFile[si], 's'
+            inc si
+            mov pathFile[si], 'o'
             inc si
             mov pathFile[si], 00h
             mov [pathBool], 49
             
-            ;print auxiliar
-            ;print ln
+            ; print auxiliar
+            ; print ln
             ; print pathFile
         desalmacenar
 
