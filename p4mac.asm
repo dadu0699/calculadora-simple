@@ -87,7 +87,7 @@ equalsString macro buffer, command, etq
     almacenar
     mov ax, ds
     mov es, ax
-    mov cx, 5   ;Cantidad de caracateres a comparar
+    mov cx, 30   ;Cantidad de caracateres a comparar
     
     lea si, buffer
     lea di, command
@@ -202,6 +202,8 @@ readFile macro nobytes, buffer, handle
     lea dx, buffer
     int 21h
     jc ReadingError
+    print msgPath
+    print ln
 endm
 
 writingFile macro numbytes, buffer, handle
@@ -321,6 +323,7 @@ endm
 ;-------------------------------------------------------------------------------------
 forArray macro buffer
     LOCAL CICLO, CONTINUARC, FINC, IDS, SAVEID, GUARDARPADRE, GUARDARPLOOP, FINLOOPGP
+    LOCAL BUSCARNUM, CICLONUM, FINCICLONUM
 
     xor si, si
     xor cx, cx
@@ -328,7 +331,7 @@ forArray macro buffer
     
     CICLO:
         mov dh, buffer[si]        
-        cmp dh, 22h
+        cmp dh, 22h ; "
         je IDS
         jmp CONTINUARC
 
@@ -342,8 +345,11 @@ forArray macro buffer
     IDS:
         inc si
         mov dh, buffer[si]
-        cmp dh, 22h
+        cmp dh, 22h ; "
         je SAVEID
+
+        cmp dh, 23h ; #
+        je BUSCARNUM
 
         PUSH si
         xor si, si
@@ -360,7 +366,7 @@ forArray macro buffer
         mov ah, auxiliar
         PUSH ax
 
-        cmp [pathBool], 48
+        cmp [pathBool], 48 ; 0 FALSE
 		je GUARDARPADRE
 
         ;print auxiliar
@@ -391,7 +397,7 @@ forArray macro buffer
             mov pathFile[si], 'o'
             inc si
             mov pathFile[si], 00h
-            mov [pathBool], 49
+            mov [pathBool], 49 ; 1 TRUE
             
             ; print auxiliar
             ; print ln
@@ -401,7 +407,54 @@ forArray macro buffer
         clearString auxiliar
         inc si
         jmp CICLO
+
+
+    BUSCARNUM:
+        inc si
+        inc si
+        inc si
+        jmp CICLONUM
+
+    CICLONUM:
+        inc si
+        mov dh, buffer[si]
+        
+        cmp dh, 2Ch ; ,
+            je FINCICLONUM
+        cmp dh, 7Dh ; }
+            je FINCICLONUM
+        cmp dh, 0ah ; SALTO DE LINEA
+            je FINCICLONUM
+
+        PUSH si
+        xor si, si
+        mov si, cx
+        mov auxiliar[si], dh
+        inc cx
+        POP si
+        jmp CICLONUM
+
+    FINCICLONUM:
+        xor cx, cx
+        xor ax, ax
+        mov ah, auxiliar
+        PUSH ax
+
+        ;print auxiliar
+        clearString auxiliar
+        ;getChr
+
+        inc si
+        jmp CICLO
+    
     FINC:
+endm
+
+operaciones macro buffer
+endm
+
+comandos macro buffer
+    ; LOCAL 
 endm
 
 ;-------------------------------------------------------------------------------------
