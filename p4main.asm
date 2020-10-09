@@ -38,11 +38,12 @@ msgDeleteError   db 0ah,0dh,20h,20h,  'ERROR: NO SE PUDO ELIMINAR EL ARCHIVO', '
 msgReadingError  db 0ah,0dh,20h,20h,  'ERROR: NO SE PUDO LEER EL ARCHIVO', '$'
 msgCloseError    db 0ah,0dh,20h,20h,  'ERROR: NO SE PUDO CERRAR EL ARCHIVO', '$'
 
-bufferContenidoJSON db 10000 dup('$')
-auxiliar db 50 dup('$')
-numeroU db 00h, '$'
-numeroD db 00h, '$'
-signo   db 00h, '$'
+bufferContenidoJSON db 10000 dup('$')       ; Array para almacenar el contenido del archivo
+auxiliar db 50 dup('$')                     ; Variable para ir formando cada uno de los IDs y numero del archivo
+auxiliarW dw 50 dup('$')                    ; 
+numeroU db 00h, '$'                         ; Variable para el numero1 a operar
+numeroD db 00h, '$'                         ; Variable para el numero2 a operar
+signo   db 00h, '$'                         ; Variable para guardar el signo de operacion
 handleFile dw ?
 
 alumnoJSON db '{', 0ah,0dh,09h, '"reporte": {', 0ah,0dh,09h,09h, '"alumno": {', 0ah,0dh,09h,09h,09h, '"Nombre": "Didier Alfredo Domínguez Urías",',  0ah,0dh,09h,09h,09h, '"Carnet": 201801266,', 0ah,0dh,09h,09h,09h, '"Seccion": "A",', 0ah,0dh,09h,09h,09h, '"Curso": "Arquitectura de Computadoras y Ensambladores 1"', 0ah,0dh,09h,09h, '},'                                         
@@ -72,9 +73,11 @@ resMediana db '#'
 resModa db '#'
 resMenor db '#'
 resMayor db '#'
-pathFile db 50 dup('$')
-nameParent db 30 dup(' ')
-pathBool db 48
+
+pathFile db 50 dup('$')         ; Variable para guardar el nombre del padre para el reporte
+nameParent db 30 dup('$')       ; Variable para guardar el nombre del padre e imprimir dentro del reporte
+sizeNameParent dw 0             ; Variable para almacenar la longitud del nombre del padre
+pathBool db 48                  ; Variable para saber si ya se almaceno un nombre padre 0 (False)
 ; FIN SECCION DE DATOS 
 
 .code ;SEGMENTO DE CODIGO
@@ -114,7 +117,7 @@ pathBool db 48
             closeFile handleFile
 
             forArray bufferContenidoJSON
-            ; generateReport
+            generateReport
             jmp MENU
 
         CONSOLA:

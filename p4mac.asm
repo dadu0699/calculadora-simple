@@ -40,15 +40,16 @@ getString macro buffer
     desalmacenar
 endm
 
-parseString macro buffer
+parseString macro buffer;, ref
     LOCAL RestartSplit, Split, ConcatParse, FinParse, Negativo
-    almacenar
     xor si, si
 	xor cx, cx
 	xor bx, bx
 	xor dx, dx
-	mov dl, 0ah
-	test ax, 1000000000000000
+
+	mov bx, 0ah
+    ; mov ax, ref
+	test ax, 1000000000000000b
     jnz Negativo
 	jmp Split
 
@@ -59,28 +60,26 @@ parseString macro buffer
         jmp Split
 
 	RestartSplit:
-		xor ah,ah
+		xor dx, dx
 
 	Split:
-		div dl
+		div bx
 		inc cx
-		push ax
-		cmp al, 00h
+		push dx
+		cmp ax, 00h
 		je ConcatParse
 		jmp RestartSplit
 
 	ConcatParse:
 		pop ax
-		add ah, 30h
-		mov buffer[si], ah
+		add ax, 30h
+		mov buffer[si], ax
 		inc si
 		loop ConcatParse
-		mov ah, 24h
-		mov buffer[si], ah
-		inc si
+		mov ax, 24h
+		mov buffer[si], ax
 
 	FinParse:
-    desalmacenar
 endm
 
 equalsString macro buffer, command, etq
@@ -269,7 +268,8 @@ generateReport macro
     writingFile SIZEOF resMayor, resMayor, handleFile
     writingFile SIZEOF operacionesJSON, operacionesJSON, handleFile
     
-    writingFile SIZEOF nameParent, nameParent, handleFile
+    parentSize nameParent, sizeNameParent               ; Se obtiene el tamnaño de la cadena
+    writingFile sizeNameParent, nameParent, handleFile
     writingFile SIZEOF operaciones1JSON, operaciones1JSON, handleFile
     writingFile SIZEOF operaciones2JSON, operaciones2JSON, handleFile
 
@@ -316,6 +316,23 @@ getTime macro
     mov fechaSegundos[1], al
 
     desalmacenar
+endm
+
+; @buffer cadena de la cual se obtendra la longitud exceptuando el signo de aceptacion '$'
+; @varSize contador 
+parentSize macro buffer, varSize
+    LOCAL PSIZELOOP, PSIZEENDL
+    almacenar                               ; Se guardan en la pila todos los registros anteriores 
+    xor si, si                              ; Se reinicia el contador si
+    PSIZELOOP:
+        mov dh, buffer[si]                  ; Se obtiene caracter por caracter de la cadena
+        cmp dh, '$'                         ; Se compara si es un signo de aceptacion '$'
+            je PSIZEENDL                    ; Si es un signo de aceptacion '$' se termina el ciclo
+        inc si
+        jmp PSIZELOOP
+    PSIZEENDL:
+        mov varSize, si                     ; Se actualiza el contador con el conteo llevado en el ciclo
+    desalmacenar                            ; Se sacan de la pila los registros anteriores
 endm
 
 ;-------------------------------------------------------------------------------------
