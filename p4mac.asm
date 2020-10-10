@@ -65,7 +65,7 @@ parseString macro buffer;, ref
 	Split:
 		div bx
 		inc cx
-		push dx
+		PUSH dx
 		cmp ax, 00h
 		je ConcatParse
 		jmp RestartSplit
@@ -97,7 +97,9 @@ endm
 
 convertAscii macro numero
 	LOCAL convI, finA
-    almacenar
+    PUSH cx
+    PUSH si
+
 	xor ax, ax
 	xor bx, bx
 	xor cx, cx
@@ -116,7 +118,8 @@ convertAscii macro numero
 		add ax, cx
 		jmp convI
 	finA:
-    desalmacenar
+    POP si
+    POP cx
 endm
 
 getInteger macro buffer
@@ -341,7 +344,7 @@ endm
 ; @buffer contenido del archivo JSON 
 analisisJSON macro buffer
     LOCAL CICLO, CONTINUARC, FINC
-    LOCAL BUSCARNUM, CICLONUM, FINCICLONUM, ESPNUMC, ESPNUMFC 
+    LOCAL BUSCARNUM, CICLONUM, FINCICLONUM, ESPNUMC, NEGARNUMERO, NEGARASCII 
     LOCAL IDS, VERIFICARID, SAVEID, GOPLOOP, FGOP
     LOCAL GUARDARPADRE, GUARDARPLOOP, FINLOOPGP
     LOCAL ID_DIV, ID_DIV1, ID_DIV2, ID_DIV3
@@ -356,7 +359,7 @@ analisisJSON macro buffer
     
     xor ax, ax
     mov ax, '&'
-    push ax
+    PUSH ax
     
     CICLO:
         mov dh, buffer[si]          ; Se obtiene el caracter del buffer en la posicion actual de registro si y se guarda en el registro dh
@@ -471,8 +474,8 @@ analisisJSON macro buffer
     ID_DIV:
         xor ax, ax
         mov ah, '/'
-        push ax
-        
+        PUSH ax
+
         clearString auxiliar
         inc si
         jmp CICLO
@@ -495,7 +498,7 @@ analisisJSON macro buffer
     ID_MUL:
         xor ax, ax
         mov ah, '*'
-        push ax
+        PUSH ax
 
         clearString auxiliar
         inc si
@@ -519,7 +522,7 @@ analisisJSON macro buffer
     ID_SUB:
         xor ax, ax
         mov ah, '-'
-        push ax
+        PUSH ax
 
         clearString auxiliar
         inc si
@@ -543,7 +546,7 @@ analisisJSON macro buffer
     ID_ADD:
         xor ax, ax
         mov ah, '+'
-        push ax
+        PUSH ax
 
         clearString auxiliar
         inc si
@@ -615,9 +618,23 @@ analisisJSON macro buffer
 
 
     BUSCARNUM:
-        inc si
-        inc si
-        inc si
+        ESPNUMC:    
+            inc si    
+            mov dh, buffer[si]
+            cmp dh, 22h ; COMILLAS DOBLES
+            je ESPNUMC
+            cmp dh, 3Ah ; DOS PUNTOS :
+            je ESPNUMC
+            cmp dh, 20h ; ESPACIO EN BLANCO
+            je ESPNUMC
+            cmp dh, 0ah ; SALTO DE LINEA
+            je ESPNUMC
+            cmp dh, 0dh ; RETORNO DE CARRO
+            je ESPNUMC
+            cmp dh, 09h ; TABS
+            je ESPNUMC
+
+        dec si
         jmp CICLONUM
 
     CICLONUM:
@@ -630,6 +647,8 @@ analisisJSON macro buffer
             je FINCICLONUM
         cmp dh, 0ah ; SALTO DE LINEA
             je FINCICLONUM
+        cmp dh, 2Dh ; Signo Menos -
+            je NEGARNUMERO
 
         PUSH si
         xor si, si
@@ -638,29 +657,68 @@ analisisJSON macro buffer
         inc cx
         POP si
         jmp CICLONUM
+    NEGARNUMERO:
+        mov [negativo], 49      ; La variable del negativo pasa a ser 1 (True)
+        jmp CICLONUM
 
     FINCICLONUM:
-        xor cx, cx
-        xor ax, ax
-        mov ah, auxiliar
-        PUSH ax
+        xor cx, CX
+        
+        convertAscii auxiliar
+        cmp [negativo], 48          ; Se verifica si no es necesario negar
+		je NEGARASCII 
+        neg ax
 
-        ;print auxiliar
+        NEGARASCII:
+        PUSH ax
+        ; print auxiliar
         clearString auxiliar
-        ;getChr
+        ; getChr
+        mov [negativo], 48 
 
         inc si
         jmp CICLO
     
     FINC:
+        xor ax, ax
+        POP ax
+        parseString numeroU
+        print numeroU
+        getChr 
+
+        xor ax, ax
+        POP ax
+        parseString numeroU
+        print numeroU
+        getChr  
+        
+        xor ax, ax
+        POP ax
+        clearString auxiliar
+        mov auxiliar, ah
+        print auxiliar
+        getChr 
+        
+        xor ax, ax
+        POP ax
+        parseString numeroU
+        print numeroU
+        getChr 
+
+        xor ax, ax
+        POP ax
+        parseString numeroU
+        print numeroU
+        getChr  
+        
+        xor ax, ax
+        POP ax
+        clearString auxiliar
+        mov auxiliar, ah
+        print auxiliar
+        getChr 
 endm
 
-operaciones macro buffer
-endm
-
-comandos macro buffer
-    ; LOCAL 
-endm
 
 ;-------------------------------------------------------------------------------------
 ; MACROS ALMACENAMIENTO

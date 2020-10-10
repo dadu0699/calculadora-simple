@@ -40,8 +40,9 @@ msgCloseError    db 0ah,0dh,20h,20h,  'ERROR: NO SE PUDO CERRAR EL ARCHIVO', '$'
 
 bufferContenidoJSON db 10000 dup('$')       ; Array para almacenar el contenido del archivo
 auxiliar db 50 dup('$')                     ; Variable para ir formando cada uno de los IDs y numero del archivo
-numeroU db 00h, '$'                         ; Variable para el numero1 a operar
-numeroD db 00h, '$'                         ; Variable para el numero2 a operar
+negativo db 48                              ; Variable para saber si hay que negar un numero
+numeroU dw 00h, '$'                         ; Variable para el numero1 a operar
+numeroD dw 00h, '$'                         ; Variable para el numero2 a operar
 signo   db 00h, '$'                         ; Variable para guardar el signo de operacion
 handleFile dw ?
 
