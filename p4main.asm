@@ -40,28 +40,27 @@ msgCloseError    db 0ah,0dh,20h,20h,  'ERROR: NO SE PUDO CERRAR EL ARCHIVO', '$'
 
 bufferContenidoJSON db 10000 dup('$')       ; Array para almacenar el contenido del archivo
 auxiliar db 50 dup('$')                     ; Variable para ir formando cada uno de los IDs y numero del archivo
-auxiliarW dw 50 dup('$')                    ; 
 numeroU db 00h, '$'                         ; Variable para el numero1 a operar
 numeroD db 00h, '$'                         ; Variable para el numero2 a operar
 signo   db 00h, '$'                         ; Variable para guardar el signo de operacion
 handleFile dw ?
 
-alumnoJSON db '{', 0ah,0dh,09h, '"reporte": {', 0ah,0dh,09h,09h, '"alumno": {', 0ah,0dh,09h,09h,09h, '"Nombre": "Didier Alfredo Domínguez Urías",',  0ah,0dh,09h,09h,09h, '"Carnet": 201801266,', 0ah,0dh,09h,09h,09h, '"Seccion": "A",', 0ah,0dh,09h,09h,09h, '"Curso": "Arquitectura de Computadoras y Ensambladores 1"', 0ah,0dh,09h,09h, '},'                                         
-fechaDiaJSON db  0ah,0dh,09h,09h, '"fecha": {', 0ah,0dh,09h,09h,09h, '"Dia": '
-fechaMesJSON db  ',', 0ah,0dh,09h,09h,09h, '"Mes": '
-fechaAnioJSON db  ',', 0ah,0dh,09h,09h,09h, '"Año": 2020'
-horaHoraJSON db  0ah,0dh,09h,09h, '},', 0ah,0dh,09h,09h, '"hora": {', 0ah,0dh,09h,09h,09h, '"Hora": '
-horaMinutosJSON db  ',', 0ah,0dh,09h,09h,09h, '"Minutos": '
-horaSegundosJSON db  ',', 0ah,0dh,09h,09h,09h, '"Segundos": '
-resultsMediaJSON db  0ah,0dh,09h,09h, '},', 0ah,0dh,09h,09h, '"resultados": {', 0ah,0dh,09h,09h,09h, '"Media": '
-resultsMedianaJSON db  ',', 0ah,0dh,09h,09h,09h, '"Mediana": '
-resultsModaJSON db  ',', 0ah,0dh,09h,09h,09h, '"Moda": '
-resultsMenorJSON db  ',', 0ah,0dh,09h,09h,09h, '"Menor": '
-resultsMayorJSON db  ',', 0ah,0dh,09h,09h,09h, '"Mayor": '
-operacionesJSON db  0ah,0dh,09h,09h, '},', 0ah,0dh,09h,09h, '"'
-operaciones1JSON db '": [', 0ah,0dh,09h,09h,09h, '{', 0ah,0dh,09h,09h,09h,09h
-operaciones2JSON db 0ah,0dh,09h,09h,09h, '},'
-cierreJSON db  0ah,0dh,09h,09h, ']', 0ah,0dh,09h, '}', 0ah,0dh, '}'
+alumnoJSON db '{', 0ah,09h, '"reporte": {', 0ah,09h,09h, '"alumno": {', 0ah,09h,09h,09h, '"Nombre": "Didier Alfredo Domínguez Urías",',  0ah,09h,09h,09h, '"Carnet": 201801266,', 0ah,09h,09h,09h, '"Seccion": "A",', 0ah,09h,09h,09h, '"Curso": "Arquitectura de Computadoras y Ensambladores 1"', 0ah,09h,09h, '},'                                         
+fechaDiaJSON db  0ah,09h,09h, '"fecha": {', 0ah,09h,09h,09h, '"Dia": '
+fechaMesJSON db  ',', 0ah,09h,09h,09h, '"Mes": '
+fechaAnioJSON db  ',', 0ah,09h,09h,09h, '"Año": 2020'
+horaHoraJSON db  0ah,09h,09h, '},', 0ah,09h,09h, '"hora": {', 0ah,09h,09h,09h, '"Hora": '
+horaMinutosJSON db  ',', 0ah,09h,09h,09h, '"Minutos": '
+horaSegundosJSON db  ',', 0ah,09h,09h,09h, '"Segundos": '
+resultsMediaJSON db  0ah,09h,09h, '},', 0ah,09h,09h, '"resultados": {', 0ah,09h,09h,09h, '"Media": '
+resultsMedianaJSON db  ',', 0ah,09h,09h,09h, '"Mediana": '
+resultsModaJSON db  ',', 0ah,09h,09h,09h, '"Moda": '
+resultsMenorJSON db  ',', 0ah,09h,09h,09h, '"Menor": '
+resultsMayorJSON db  ',', 0ah,09h,09h,09h, '"Mayor": '
+operacionesJSON db  0ah,09h,09h, '},', 0ah,09h,09h, '"'
+operaciones1JSON db '": [', 0ah,09h,09h,09h, '{', 0ah,09h,09h,09h,09h
+operaciones2JSON db 0ah,09h,09h,09h, '},'
+cierreJSON db  0ah,09h,09h, ']', 0ah,09h, '}', 0ah, '}'
 
 fechaDia db 'dd'
 fechaMes db 'mm'
@@ -78,6 +77,11 @@ pathFile db 50 dup('$')         ; Variable para guardar el nombre del padre para
 nameParent db 30 dup('$')       ; Variable para guardar el nombre del padre e imprimir dentro del reporte
 sizeNameParent dw 0             ; Variable para almacenar la longitud del nombre del padre
 pathBool db 48                  ; Variable para saber si ya se almaceno un nombre padre 0 (False)
+
+arrOperacionesNom db 255 dup('$')
+arrOperacionesVal dw ?
+contadorOperacionNom dw 0
+contadorOperacionVal dw 0
 ; FIN SECCION DE DATOS 
 
 .code ;SEGMENTO DE CODIGO
@@ -116,8 +120,8 @@ pathBool db 48                  ; Variable para saber si ya se almaceno un nombr
             readFile SIZEOF bufferContenidoJSON, bufferContenidoJSON , handleFile
             closeFile handleFile
 
-            forArray bufferContenidoJSON
-            generateReport
+            analisisJSON bufferContenidoJSON        ; Se recorre el archivo
+            ; generateReport
             jmp MENU
 
         CONSOLA:

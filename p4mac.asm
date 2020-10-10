@@ -336,62 +336,250 @@ parentSize macro buffer, varSize
 endm
 
 ;-------------------------------------------------------------------------------------
-; MACROS ANALIZIS Y OPERACIONES
+; MACROS ANALISIS Y OPERACIONES
 ;-------------------------------------------------------------------------------------
-forArray macro buffer
-    LOCAL CICLO, CONTINUARC, FINC, IDS, SAVEID, GUARDARPADRE, GUARDARPLOOP, FINLOOPGP
-    LOCAL BUSCARNUM, CICLONUM, FINCICLONUM
+; @buffer contenido del archivo JSON 
+analisisJSON macro buffer
+    LOCAL CICLO, CONTINUARC, FINC
+    LOCAL BUSCARNUM, CICLONUM, FINCICLONUM, ESPNUMC, ESPNUMFC 
+    LOCAL IDS, VERIFICARID, SAVEID, GOPLOOP, FGOP
+    LOCAL GUARDARPADRE, GUARDARPLOOP, FINLOOPGP
+    LOCAL ID_DIV, ID_DIV1, ID_DIV2, ID_DIV3
+    LOCAL ID_MUL, ID_MUL1, ID_MUL2, ID_MUL3
+    LOCAL ID_SUB, ID_SUB1, ID_SUB2, ID_SUB3
+    LOCAL ID_ADD, ID_ADD1, ID_ADD2, ID_ADD3
+    LOCAL ID_ID, ID_ID1, ID_ID2
 
-    xor si, si
-    xor cx, cx
-    mov [pathBool], 48
+    xor si, si                      ; Limpiar registro SI el cual nos servira como contador global del archivo
+    xor cx, cx                      ; Limpiar registro CX para llevar el control de caracteres de IDs
+    mov [pathBool], 48              ; Se reinicia la variable del nombre del padre
+    
+    xor ax, ax
+    mov ax, '&'
+    push ax
     
     CICLO:
-        mov dh, buffer[si]        
-        cmp dh, 22h ; "
-        je IDS
+        mov dh, buffer[si]          ; Se obtiene el caracter del buffer en la posicion actual de registro si y se guarda en el registro dh
+        
+        cmp dh, 22h                 ; Se verifica si el caracter en el registro dh es igual a las comillas dobles '"'
+        je IDS                      ; Si son comillas dobles se salta a la etiqueta para reconocer IDs
+        
         jmp CONTINUARC
 
     CONTINUARC: 
-        cmp dh, '$'
-        je FINC
+        cmp dh, '$'                 ; Se verifica si el caracater en el registro dh es un signo de aceptacion '$'
+        je FINC                     ; Si es un signo de aceptacion se salta a la etiqueta para finalizar el analisis
 
-        inc si
-        jmp CICLO
+        inc si                      ; Se incremente el contador guardado en el registro SI
+        jmp CICLO                   
 
     IDS:
-        inc si
-        mov dh, buffer[si]
-        cmp dh, 22h ; "
-        je SAVEID
+        inc si                      ; Se incremente el contador guardado en el registro SI 
+        mov dh, buffer[si]          ; Se obtiene el caracter del buffer en la posicion actual de registro si y se guarda en el registro dh
+        cmp dh, 22h                 ; Se verifica si el caracter en el registro dh es igual a las comillas dobles '"'
+        je VERIFICARID              ; Si son comillas dobles se salta a la etiqueta para guardar IDs
 
-        cmp dh, 23h ; #
-        je BUSCARNUM
+        cmp dh, 23h                 ; Se verifica si el caracter en el registro dh es igual al signo numeral '#'
+        je BUSCARNUM                ; Si son comillas dobles se salta a la etiqueta para reconocer numeros
 
-        PUSH si
-        xor si, si
-        mov si, cx
-        mov auxiliar[si], dh
-        inc cx
-        POP si
+        PUSH si                     ; Almacenamos el contador global en la pila
+        xor si, si                  ; Limpiar registro
+        mov si, cx                  ; Movemos el valor del registro cx a si
+        mov auxiliar[si], dh        ; Vamos formando el ID
+        inc cx                      ; incrementamos CX
+        POP si                      ; Sacamos el contador global en la pila
 
         jmp IDS
 
-    SAVEID:
-        xor cx, cx
-        xor ax, ax
-        mov ah, auxiliar
-        PUSH ax
+    VERIFICARID:
+        xor ax, ax                  ; Limpiamos el valor almacenado en AX
+        xor cx, cx                  ; Limpiamos CX para llevar el control de futuros IDs
 
-        cmp [pathBool], 48 ; 0 FALSE
-		je GUARDARPADRE
+        cmp [pathBool], 48          ; Se verifica si ya se almaceno un padre (48 = 0 "False")
+		je GUARDARPADRE             ; Si es "0" se salta a guardar el padre
+
+        ; BUSCAR DIVISION
+        cmp auxiliar[0], 'D'
+        je ID_DIV1
+        cmp auxiliar[0], 'd'
+        je ID_DIV1
+        cmp auxiliar[0], '/'
+        je ID_DIV
+
+        ; BUSCAR MULTIPLICACION
+        cmp auxiliar[0], 'M'
+        je ID_MUL1
+        cmp auxiliar[0], 'm'
+        je ID_MUL1
+        cmp auxiliar[0], '*'
+        je ID_MUL
+
+        ; BUSCAR RESTA
+        cmp auxiliar[0], 'S'
+        je ID_SUB1
+        cmp auxiliar[0], 's'
+        je ID_SUB1
+        cmp auxiliar[0], '-'
+        je ID_SUB
+
+        ; BUSCAR SUMA
+        cmp auxiliar[0], 'A'
+        je ID_ADD1
+        cmp auxiliar[0], 'a'
+        je ID_ADD1
+        cmp auxiliar[0], '+'
+        je ID_ADD
+
+        ; BUSCAR ID
+        cmp auxiliar[0], 'I'
+        je ID_ID1
+        cmp auxiliar[0], 'i'
+        je ID_ID1
+
+        jmp SAVEID
+
+    SAVEID:        
+        almacenar                           ; Se Guardan los registros anteriores en pila
+        xor si, si                          ; Reiniciamos el registro SI el cual nos ayudara a recorrer el aux
+        mov di, contadorOperacionNom        ; Guardamos en el registro DI el valor de posicion del ultimo nombre de operacion mas 1
+        GOPLOOP:
+            mov dh, auxiliar[si]
+            cmp dh, '$'
+            je FGOP
+            
+            mov arrOperacionesNom[di], dh   ; Vamos almacenando el letra por letra el nuevo nombre de operacion
+            
+            inc di
+            inc si
+            jmp GOPLOOP
+        FGOP:
+            mov arrOperacionesNom[di], '&'  ; Agregamos un valor pivote para reconocer los ID
+            inc di
+            mov contadorOperacionNom, di
+            inc contadorOperacionVal
+            ;print arrOperacionesNom
+            ;getChr
+        desalmacenar
 
         ;print auxiliar
         clearString auxiliar
-        ;getChr
-
+        ; getChr
         inc si
         jmp CICLO
+
+
+    ID_DIV:
+        xor ax, ax
+        mov ah, '/'
+        push ax
+        
+        clearString auxiliar
+        inc si
+        jmp CICLO
+    ID_DIV1:
+        cmp auxiliar[1], 'I'
+        je ID_DIV2
+        cmp auxiliar[1], 'i'
+        je ID_DIV2
+        jmp SAVEID
+    ID_DIV2:
+        cmp auxiliar[2], 'V'
+        je ID_DIV3
+        cmp auxiliar[2], 'v'
+        je ID_DIV3
+        jmp SAVEID
+    ID_DIV3:
+        cmp auxiliar[3], '$'
+        je ID_DIV
+        jmp SAVEID
+    ID_MUL:
+        xor ax, ax
+        mov ah, '*'
+        push ax
+
+        clearString auxiliar
+        inc si
+        jmp CICLO
+    ID_MUL1:
+        cmp auxiliar[1], 'U'
+        je ID_MUL2
+        cmp auxiliar[1], 'u'
+        je ID_MUL2
+        jmp SAVEID
+    ID_MUL2:
+        cmp auxiliar[2], 'L'
+        je ID_MUL3
+        cmp auxiliar[2], 'l'
+        je ID_MUL3
+        jmp SAVEID
+    ID_MUL3:
+        cmp auxiliar[3], '$'
+        je ID_MUL
+        jmp SAVEID
+    ID_SUB:
+        xor ax, ax
+        mov ah, '-'
+        push ax
+
+        clearString auxiliar
+        inc si
+        jmp CICLO
+    ID_SUB1:
+        cmp auxiliar[1], 'U'
+        je ID_SUB2
+        cmp auxiliar[1], 'u'
+        je ID_SUB2
+        jmp SAVEID
+    ID_SUB2:
+        cmp auxiliar[2], 'B'
+        je ID_SUB3
+        cmp auxiliar[2], 'b'
+        je ID_SUB3
+        jmp SAVEID
+    ID_SUB3:
+        cmp auxiliar[3], '$'
+        je ID_SUB
+        jmp SAVEID
+    ID_ADD:
+        xor ax, ax
+        mov ah, '+'
+        push ax
+
+        clearString auxiliar
+        inc si
+        jmp CICLO
+    ID_ADD1:
+        cmp auxiliar[1], 'D'
+        je ID_ADD2
+        cmp auxiliar[1], 'd'
+        je ID_ADD2
+        jmp SAVEID
+    ID_ADD2:
+        cmp auxiliar[2], 'D'
+        je ID_ADD3
+        cmp auxiliar[2], 'd'
+        je ID_ADD3
+        jmp SAVEID
+    ID_ADD3:
+        cmp auxiliar[3], '$'
+        je ID_ADD
+        jmp SAVEID
+    ID_ID:
+        ;TODO BUSCAR VALOR DEL ID
+
+        clearString auxiliar
+        inc si
+        jmp CICLO
+    ID_ID1:
+        cmp auxiliar[1], 'D'
+        je ID_ID2
+        cmp auxiliar[1], 'd'
+        je ID_ID2
+    ID_ID2:
+        cmp auxiliar[3], '$'
+        je ID_ID
+        jmp SAVEID
+
 
     GUARDARPADRE:
         almacenar
