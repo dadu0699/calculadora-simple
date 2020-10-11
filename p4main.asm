@@ -59,8 +59,11 @@ resultsModaJSON db  ',', 0ah,09h,09h,09h, '"Moda": '
 resultsMenorJSON db  ',', 0ah,09h,09h,09h, '"Menor": '
 resultsMayorJSON db  ',', 0ah,09h,09h,09h, '"Mayor": '
 operacionesJSON db  0ah,09h,09h, '},', 0ah,09h,09h, '"'
-operaciones1JSON db '": [', 0ah,09h,09h,09h, '{', 0ah,09h,09h,09h,09h
-operaciones2JSON db 0ah,09h,09h,09h, '},'
+operaciones1JSON db '": ['
+operaciones2JSON db 0ah,09h,09h,09h, '{', 0ah,09h,09h,09h,09h
+comillasDB db '"'
+dosPuntos db ': '
+operaciones3JSON db 0ah,09h,09h,09h, '},'
 cierreJSON db  0ah,09h,09h, ']', 0ah,09h, '}', 0ah, '}'
 
 fechaDia db 'dd'
@@ -83,6 +86,7 @@ arrOperacionesNom db 255 dup('$')
 arrOperacionesVal dw 255 dup('$')
 contadorOperacionNom dw 0
 contadorOperacionVal dw 0
+auxValor dw 0
 
 msgRESTA db 0ah,0dh, '   Resultado RESTA ', '$'
 msgSUMA db 0ah,0dh, '   Resultado SUMA ', '$'
@@ -122,7 +126,6 @@ msgDIV db 0ah,0dh, '   Resultado DIVISION ', '$'
             clearString auxiliar
             clearString arrOperacionesNom
             clearString arrOperacionesVal
-            mov arrOperacionesVal[0], 00h
             mov contadorOperacionNom, 0
             mov contadorOperacionVal, 0
 
@@ -134,7 +137,7 @@ msgDIV db 0ah,0dh, '   Resultado DIVISION ', '$'
             closeFile handleFile
 
             analisisJSON bufferContenidoJSON        ; Se recorre el archivo
-            ; generateReport
+            generateReport
             jmp MENU
 
         CONSOLA:

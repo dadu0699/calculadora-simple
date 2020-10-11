@@ -277,12 +277,54 @@ generateReport macro
     
     parentSize nameParent, sizeNameParent               ; Se obtiene el tamnaño de la cadena
     writingFile sizeNameParent, nameParent, handleFile
-    writingFile SIZEOF operaciones1JSON, operaciones1JSON, handleFile
-    writingFile SIZEOF operaciones2JSON, operaciones2JSON, handleFile
 
+    generateArrOP
+   
     writingFile SIZEOF cierreJSON, cierreJSON, handleFile
-
     closeFile handleFile
+endm
+
+generateArrOP macro 
+    LOCAL OPERREPORT, ENDOPERREPORT, GETIDLOOP, GETIDLOOPEND, GETVAL
+    
+    writingFile SIZEOF operaciones1JSON, operaciones1JSON, handleFile
+    
+    xor si, si
+    xor di, di
+    xor cx, cx
+    OPERREPORT:
+        mov dh, arrOperacionesNom[si]
+        cmp dh, '$'
+        je ENDOPERREPORT
+        
+        writingFile SIZEOF operaciones2JSON, operaciones2JSON, handleFile
+        writingFile SIZEOF comillasDB, comillasDB, handleFile
+        
+        GETIDLOOP:
+            mov dh, arrOperacionesNom[si]
+            mov auxiliar, dh
+            cmp auxiliar, '&'
+            je GETIDLOOPEND
+            inc si
+            parentSize auxiliar, sizeNameParent
+            writingFile sizeNameParent, auxiliar, handleFile
+            jmp GETIDLOOP
+        GETIDLOOPEND:
+        
+        writingFile SIZEOF comillasDB, comillasDB, handleFile
+        writingFile SIZEOF dosPuntos, dosPuntos, handleFile
+
+        parseString numeroU, arrOperacionesVal[di]
+        buffSize numeroU, sizeNameParent
+        writingFile sizeNameParent, numeroU, handleFile
+        inc di
+        inc di
+        
+        writingFile SIZEOF operaciones3JSON, operaciones3JSON, handleFile
+
+        inc si
+        JMP OPERREPORT
+    ENDOPERREPORT:
 endm
 
 getDate macro
@@ -334,6 +376,21 @@ parentSize macro buffer, varSize
     PSIZELOOP:
         mov dh, buffer[si]                  ; Se obtiene caracter por caracter de la cadena
         cmp dh, '$'                         ; Se compara si es un signo de aceptacion '$'
+            je PSIZEENDL                    ; Si es un signo de aceptacion '$' se termina el ciclo
+        inc si
+        jmp PSIZELOOP
+    PSIZEENDL:
+        mov varSize, si                     ; Se actualiza el contador con el conteo llevado en el ciclo
+    desalmacenar                            ; Se sacan de la pila los registros anteriores
+endm
+
+buffSize macro buffer, varSize
+    LOCAL PSIZELOOP, PSIZEENDL
+    almacenar                               ; Se guardan en la pila todos los registros anteriores 
+    xor si, si                              ; Se reinicia el contador si
+    PSIZELOOP:
+        mov dx, buffer[si]                  ; Se obtiene caracter por caracter de la cadena
+        cmp dx, '$'                         ; Se compara si es un signo de aceptacion '$'
             je PSIZEENDL                    ; Si es un signo de aceptacion '$' se termina el ciclo
         inc si
         jmp PSIZELOOP
@@ -464,7 +521,6 @@ analisisJSON macro buffer
             mov arrOperacionesNom[di], '&'  ; Agregamos un valor pivote para reconocer los ID
             inc di
             mov contadorOperacionNom, di
-            inc contadorOperacionVal
             ;print arrOperacionesNom
             ;getChr
         desalmacenar
@@ -718,12 +774,20 @@ analisisJSON macro buffer
         mov ah, '&'
         PUSH ax
 
+        almacenar
         mov di, contadorOperacionVal
         mov ax, numeroD
         mov arrOperacionesVal[di], ax
+        inc contadorOperacionVal
+        inc contadorOperacionVal
+        desalmacenar
+
+        ;parseString numeroD, numeroD
+        ;print numeroD
+        ;getChr 
 
         clearString auxiliar
-        ; mov [negativo], 48 
+        mov [negativo], 48 
 
         inc si
         jmp CICLO
@@ -792,11 +856,19 @@ analisisJSON macro buffer
         mov numeroD, ax
         jmp SEGUIROPERANDO
     FINC:
-        print arrOperacionesNom
-        print ln
-        parseString numeroU, arrOperacionesVal[1]
-        print numeroU
-        getChr 
+        ;mov dh, arrOperacionesNom[0]
+        ;mov auxiliar, dh
+
+        ;print arrOperacionesNom
+        ;print ln
+        
+        ;parseString numeroU, arrOperacionesVal[0]
+        ;print numeroU
+        ;getChr 
+
+        ;parseString numeroU, arrOperacionesVal[2]
+        ;print numeroU
+        ;getChr 
 endm
 
 
