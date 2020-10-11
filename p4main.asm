@@ -80,9 +80,12 @@ sizeNameParent dw 0             ; Variable para almacenar la longitud del nombre
 pathBool db 48                  ; Variable para saber si ya se almaceno un nombre padre 0 (False)
 
 arrOperacionesNom db 255 dup('$')
-arrOperacionesVal dw ?
+arrOperacionesVal dw 255 dup('$')
 contadorOperacionNom dw 0
 contadorOperacionVal dw 0
+
+msgRESTA db 0ah,0dh, '   Resultado RESTA ', '$'
+msgSUMA db 0ah,0dh, '   Resultado SUMA ', '$'
 ; FIN SECCION DE DATOS 
 
 .code ;SEGMENTO DE CODIGO
@@ -113,6 +116,12 @@ contadorOperacionVal dw 0
             clearString path
             clearString pathFile
             clearString bufferContenidoJSON
+
+            clearString auxiliar
+            clearString arrOperacionesNom
+            clearString arrOperacionesVal
+            mov contadorOperacionNom, 0
+            mov contadorOperacionVal, 0
 
             print msgCarg
             print getPath

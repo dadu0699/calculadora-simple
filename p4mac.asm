@@ -40,15 +40,18 @@ getString macro buffer
     desalmacenar
 endm
 
-parseString macro buffer;, ref
+parseString macro buffer, ref
     LOCAL RestartSplit, Split, ConcatParse, FinParse, Negativo
+    PUSH si
+    PUSH cx
+
     xor si, si
 	xor cx, cx
 	xor bx, bx
 	xor dx, dx
 
 	mov bx, 0ah
-    ; mov ax, ref
+    mov ax, ref
 	test ax, 1000000000000000b
     jnz Negativo
 	jmp Split
@@ -80,6 +83,8 @@ parseString macro buffer;, ref
 		mov buffer[si], ax
 
 	FinParse:
+    POP cx
+    POP si
 endm
 
 equalsString macro buffer, command, etq
@@ -95,10 +100,9 @@ equalsString macro buffer, command, etq
     je etq
 endm
 
-convertAscii macro numero
+convertAscii macro numero, varSalida
 	LOCAL convI, finA
-    PUSH cx
-    PUSH si
+    almacenar
 
 	xor ax, ax
 	xor bx, bx
@@ -118,8 +122,8 @@ convertAscii macro numero
 		add ax, cx
 		jmp convI
 	finA:
-    POP si
-    POP cx
+        mov varSalida, ax
+    desalmacenar
 endm
 
 getInteger macro buffer
@@ -345,20 +349,23 @@ endm
 analisisJSON macro buffer
     LOCAL CICLO, CONTINUARC, FINC
     LOCAL BUSCARNUM, CICLONUM, FINCICLONUM, ESPNUMC, NEGARNUMERO, NEGARASCII 
-    LOCAL IDS, VERIFICARID, SAVEID, GOPLOOP, FGOP
+    LOCAL IDS, VERIFICARID, SAVEID, GOPLOOP, FGOP, SEGUIROPERANDO
     LOCAL GUARDARPADRE, GUARDARPLOOP, FINLOOPGP
     LOCAL ID_DIV, ID_DIV1, ID_DIV2, ID_DIV3
     LOCAL ID_MUL, ID_MUL1, ID_MUL2, ID_MUL3
     LOCAL ID_SUB, ID_SUB1, ID_SUB2, ID_SUB3
     LOCAL ID_ADD, ID_ADD1, ID_ADD2, ID_ADD3
     LOCAL ID_ID, ID_ID1, ID_ID2
+    LOCAL OPERAR, NOOPERAR, SUMAR, RESTAR, MULTIPLICAR, DIVIDIR, GUARDAROPERA
 
     xor si, si                      ; Limpiar registro SI el cual nos servira como contador global del archivo
     xor cx, cx                      ; Limpiar registro CX para llevar el control de caracteres de IDs
     mov [pathBool], 48              ; Se reinicia la variable del nombre del padre
     
+    mov arrOperacionesVal[0], 00h
+
     xor ax, ax
-    mov ax, '&'
+    mov ah, '&'
     PUSH ax
     
     CICLO:
@@ -662,15 +669,44 @@ analisisJSON macro buffer
         jmp CICLONUM
 
     FINCICLONUM:
-        xor cx, CX
+        xor cx, cx
         
-        convertAscii auxiliar
+        convertAscii auxiliar, numeroD
         cmp [negativo], 48          ; Se verifica si no es necesario negar
-		je NEGARASCII 
-        neg ax
+        je NEGARASCII 
+        neg numeroD
 
         NEGARASCII:
+        xor ax, ax
+        POP ax
+        clearString auxiliar
+        mov auxiliar, al
+        cmp auxiliar, 00h
+        je NOOPERAR
+        
+        mov numeroU, ax
+
+        xor ax, ax
+        POP ax
+        clearString auxiliar
+        mov auxiliar, ah
+        cmp auxiliar, '+'
+        je SUMAR
+        cmp auxiliar, '-'
+        je RESTAR
+        cmp auxiliar, '*'
+        je MULTIPLICAR
+        cmp auxiliar, '/'
+        je DIVIDIR
+
+    NOOPERAR:
+        clearString auxiliar
+        mov auxiliar, ah
+        cmp auxiliar, '&'
+        je GUARDAROPERA
+
         PUSH ax
+        PUSH numeroD
         ; print auxiliar
         clearString auxiliar
         ; getChr
@@ -679,43 +715,75 @@ analisisJSON macro buffer
         inc si
         jmp CICLO
     
+    GUARDAROPERA:
+        xor ax, ax
+        mov ah, '&'
+        PUSH ax
+
+        mov di, contadorOperacionVal
+        mov ax, numeroD
+        mov arrOperacionesVal[di], ax
+
+        clearString auxiliar
+        ; mov [negativo], 48 
+
+        inc si
+        jmp CICLO
+
+    SEGUIROPERANDO:
+        xor ax, ax
+        POP ax
+        clearString auxiliar
+        mov auxiliar, al
+        cmp auxiliar, 00h
+        je NOOPERAR
+
+        mov numeroU, ax
+
+        xor ax, ax
+        POP ax
+        clearString auxiliar
+        mov auxiliar, ah
+
+        cmp auxiliar, '+'
+        je SUMAR
+        cmp auxiliar, '-'
+        je RESTAR
+        cmp auxiliar, '*'
+        je MULTIPLICAR
+        cmp auxiliar, '/'
+        je DIVIDIR
+
+    SUMAR:
+        mov ax, numeroU
+        mov bx, numeroD
+        add ax, bx
+        
+        clearString numeroU
+        clearString numeroD
+        mov numeroD, ax
+        jmp SEGUIROPERANDO
+
+    RESTAR:
+        mov ax, numeroU
+        mov bx, numeroD
+        sub ax, bx
+
+
+        clearString numeroU
+        clearString numeroD
+        mov numeroD, ax
+        jmp SEGUIROPERANDO
+
+    DIVIDIR:
+        jmp GUARDAROPERA
+    MULTIPLICAR:
+        jmp GUARDAROPERA
     FINC:
-        xor ax, ax
-        POP ax
-        parseString numeroU
+        print arrOperacionesNom
+        print ln
+        parseString numeroU, arrOperacionesVal[1]
         print numeroU
-        getChr 
-
-        xor ax, ax
-        POP ax
-        parseString numeroU
-        print numeroU
-        getChr  
-        
-        xor ax, ax
-        POP ax
-        clearString auxiliar
-        mov auxiliar, ah
-        print auxiliar
-        getChr 
-        
-        xor ax, ax
-        POP ax
-        parseString numeroU
-        print numeroU
-        getChr 
-
-        xor ax, ax
-        POP ax
-        parseString numeroU
-        print numeroU
-        getChr  
-        
-        xor ax, ax
-        POP ax
-        clearString auxiliar
-        mov auxiliar, ah
-        print auxiliar
         getChr 
 endm
 
