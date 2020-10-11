@@ -86,6 +86,8 @@ contadorOperacionVal dw 0
 
 msgRESTA db 0ah,0dh, '   Resultado RESTA ', '$'
 msgSUMA db 0ah,0dh, '   Resultado SUMA ', '$'
+msgMULT db 0ah,0dh, '   Resultado MULTIPLICACION ', '$'
+msgDIV db 0ah,0dh, '   Resultado DIVISION ', '$'
 ; FIN SECCION DE DATOS 
 
 .code ;SEGMENTO DE CODIGO
@@ -120,6 +122,7 @@ msgSUMA db 0ah,0dh, '   Resultado SUMA ', '$'
             clearString auxiliar
             clearString arrOperacionesNom
             clearString arrOperacionesVal
+            mov arrOperacionesVal[0], 00h
             mov contadorOperacionNom, 0
             mov contadorOperacionVal, 0
 

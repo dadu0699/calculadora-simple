@@ -362,8 +362,6 @@ analisisJSON macro buffer
     xor cx, cx                      ; Limpiar registro CX para llevar el control de caracteres de IDs
     mov [pathBool], 48              ; Se reinicia la variable del nombre del padre
     
-    mov arrOperacionesVal[0], 00h
-
     xor ax, ax
     mov ah, '&'
     PUSH ax
@@ -769,16 +767,30 @@ analisisJSON macro buffer
         mov bx, numeroD
         sub ax, bx
 
-
         clearString numeroU
         clearString numeroD
         mov numeroD, ax
         jmp SEGUIROPERANDO
 
     DIVIDIR:
-        jmp GUARDAROPERA
+        mov ax, numeroU
+        mov bx, numeroD
+        cwd
+        idiv bx
+
+        clearString numeroU
+        clearString numeroD
+        mov numeroD, ax
+        jmp SEGUIROPERANDO
     MULTIPLICAR:
-        jmp GUARDAROPERA
+        mov ax, numeroU
+        mov bx, numeroD
+        imul bx
+
+        clearString numeroU
+        clearString numeroD
+        mov numeroD, ax
+        jmp SEGUIROPERANDO
     FINC:
         print arrOperacionesNom
         print ln
