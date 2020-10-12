@@ -265,29 +265,34 @@ generateReport macro
     writingFile SIZEOF fechaSegundos, fechaSegundos, handleFile
     
     writingFile SIZEOF resultsMediaJSON, resultsMediaJSON, handleFile
-    parseString resMedia, resMedia
-    buffSize resMedia, sizeNameParent
-    writingFile sizeNameParent, resMedia, handleFile
+    clearString numeroU
+    parseString numeroU, resMedia
+    buffSize numeroU, sizeNameParent
+    writingFile sizeNameParent, numeroU, handleFile
     
     writingFile SIZEOF resultsMedianaJSON, resultsMedianaJSON, handleFile
-    parseString resMediana, resMediana
-    buffSize resMediana, sizeNameParent
-    writingFile sizeNameParent, resMediana, handleFile
+    clearString numeroU
+    parseString numeroU, resMediana
+    buffSize numeroU, sizeNameParent
+    writingFile sizeNameParent, numeroU, handleFile
     
     writingFile SIZEOF resultsModaJSON, resultsModaJSON, handleFile
-    parseString resModa, resModa
-    buffSize resModa, sizeNameParent
-    writingFile sizeNameParent, resModa, handleFile
+    clearString numeroU
+    parseString numeroU, resModa
+    buffSize numeroU, sizeNameParent
+    writingFile sizeNameParent, numeroU, handleFile
     
     writingFile SIZEOF resultsMenorJSON, resultsMenorJSON, handleFile
-    parseString resMenor, resMenor
-    buffSize resMenor, sizeNameParent
-    writingFile sizeNameParent, resMenor, handleFile
+    clearString numeroU
+    parseString numeroU, resMenor
+    buffSize numeroU, sizeNameParent
+    writingFile sizeNameParent, numeroU, handleFile
     
     writingFile SIZEOF resultsMayorJSON, resultsMayorJSON, handleFile
-    parseString resMayor, resMayor
-    buffSize resMayor, sizeNameParent
-    writingFile sizeNameParent, resMayor, handleFile
+    clearString numeroU
+    parseString numeroU, resMayor
+    buffSize numeroU, sizeNameParent
+    writingFile sizeNameParent, numeroU, handleFile
     writingFile SIZEOF operacionesJSON, operacionesJSON, handleFile
     
     parentSize nameParent, sizeNameParent               ; Se obtiene el tamnaño de la cadena
@@ -912,6 +917,9 @@ getHigher macro
     LOCAL LOOPHIGH, ENDLOOPHIGH, NOCAMBIARHIGH
 
     xor si, si
+    xor ax, ax
+    mov ax, arrOperacionesVal[si]
+    mov resMayor, ax
     LOOPHIGH: 
         xor ax, ax
         mov ax, arrOperacionesVal[si]
@@ -935,7 +943,6 @@ getLess macro
     LOCAL LOOPLESS, ENDLOOPLESS, NOCAMBIARLESS
 
     xor si, si
-
     xor ax, ax
     mov ax, arrOperacionesVal[si]
     mov resMenor, ax
