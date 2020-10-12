@@ -935,6 +935,10 @@ getLess macro
     LOCAL LOOPLESS, ENDLOOPLESS, NOCAMBIARLESS
 
     xor si, si
+
+    xor ax, ax
+    mov ax, arrOperacionesVal[si]
+    mov resMenor, ax
     LOOPLESS: 
         xor ax, ax
         mov ax, arrOperacionesVal[si]
