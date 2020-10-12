@@ -71,11 +71,11 @@ fechaMes db 'mm'
 fechaHora db 'hh'
 fechaMinutos db 'mm'
 fechaSegundos db 'ss'
-resMedia db '#'
-resMediana db '#'
-resModa db '#'
-resMenor db '#'
-resMayor db '#'
+resMedia dw 0, '$'
+resMediana dw 0, '$'
+resModa dw 0, '$'
+resMenor dw 0, '$'
+resMayor dw 0, '$'
 
 pathFile db 50 dup('$')         ; Variable para guardar el nombre del padre para el reporte
 nameParent db 30 dup('$')       ; Variable para guardar el nombre del padre e imprimir dentro del reporte
@@ -92,6 +92,10 @@ msgRESTA db 0ah,0dh, '   Resultado RESTA ', '$'
 msgSUMA db 0ah,0dh, '   Resultado SUMA ', '$'
 msgMULT db 0ah,0dh, '   Resultado MULTIPLICACION ', '$'
 msgDIV db 0ah,0dh, '   Resultado DIVISION ', '$'
+msgAnalisis  db 0ah,0dh,20h,20h,  ' OPERACIONES CALCULADAS', '$'
+msG db 0ah,0dh, '   Resultado MAYOR: ', '$'
+msL db 0ah,0dh, '   Resultado MENOR: ', '$'
+msM db 0ah,0dh, '   Resultado MEDIA: ', '$'
 ; FIN SECCION DE DATOS 
 
 .code ;SEGMENTO DE CODIGO
@@ -128,6 +132,11 @@ msgDIV db 0ah,0dh, '   Resultado DIVISION ', '$'
             clearString arrOperacionesVal
             mov contadorOperacionNom, 0
             mov contadorOperacionVal, 0
+            mov resMedia, 0
+            mov resMediana, 0
+            mov resModa, 0
+            mov resMenor, 0
+            mov resMayor, 0
 
             print msgCarg
             print getPath

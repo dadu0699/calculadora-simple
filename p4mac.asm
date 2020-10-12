@@ -263,16 +263,31 @@ generateReport macro
     writingFile SIZEOF fechaMinutos, fechaMinutos, handleFile
     writingFile SIZEOF horaSegundosJSON, horaSegundosJSON, handleFile
     writingFile SIZEOF fechaSegundos, fechaSegundos, handleFile
+    
     writingFile SIZEOF resultsMediaJSON, resultsMediaJSON, handleFile
-    writingFile SIZEOF resMedia, resMedia, handleFile
+    parseString resMedia, resMedia
+    buffSize resMedia, sizeNameParent
+    writingFile sizeNameParent, resMedia, handleFile
+    
     writingFile SIZEOF resultsMedianaJSON, resultsMedianaJSON, handleFile
-    writingFile SIZEOF resMediana, resMediana, handleFile
+    parseString resMediana, resMediana
+    buffSize resMediana, sizeNameParent
+    writingFile sizeNameParent, resMediana, handleFile
+    
     writingFile SIZEOF resultsModaJSON, resultsModaJSON, handleFile
-    writingFile SIZEOF resModa, resModa, handleFile
+    parseString resModa, resModa
+    buffSize resModa, sizeNameParent
+    writingFile sizeNameParent, resModa, handleFile
+    
     writingFile SIZEOF resultsMenorJSON, resultsMenorJSON, handleFile
-    writingFile SIZEOF resMenor, resMenor, handleFile
+    parseString resMenor, resMenor
+    buffSize resMenor, sizeNameParent
+    writingFile sizeNameParent, resMenor, handleFile
+    
     writingFile SIZEOF resultsMayorJSON, resultsMayorJSON, handleFile
-    writingFile SIZEOF resMayor, resMayor, handleFile
+    parseString resMayor, resMayor
+    buffSize resMayor, sizeNameParent
+    writingFile sizeNameParent, resMayor, handleFile
     writingFile SIZEOF operacionesJSON, operacionesJSON, handleFile
     
     parentSize nameParent, sizeNameParent               ; Se obtiene el tamnaño de la cadena
@@ -856,6 +871,9 @@ analisisJSON macro buffer
         mov numeroD, ax
         jmp SEGUIROPERANDO
     FINC:
+        print msgAnalisis
+        print ln
+
         ;mov dh, arrOperacionesNom[0]
         ;mov auxiliar, dh
 
@@ -868,10 +886,102 @@ analisisJSON macro buffer
 
         ;parseString numeroU, arrOperacionesVal[2]
         ;print numeroU
-        ;getChr 
+        ;getChr
+
+        getHigher 
+        getLess
+        getMedia
+        
+        print msG
+        parseString numeroU, resMayor
+        print numeroU
+        getChr
+        
+        print msL
+        parseString numeroU, resMenor
+        print numeroU
+        getChr
+        
+        print msM
+        parseString numeroU, resMedia
+        print numeroU
+        getChr
 endm
 
+getHigher macro 
+    LOCAL LOOPHIGH, ENDLOOPHIGH, NOCAMBIARHIGH
 
+    xor si, si
+    LOOPHIGH: 
+        xor ax, ax
+        mov ax, arrOperacionesVal[si]
+
+        cmp ax, resMayor
+        jl NOCAMBIARHIGH
+
+        mov resMayor, ax
+        NOCAMBIARHIGH:
+        inc si
+        inc si
+        
+        cmp si, contadorOperacionVal
+        je ENDLOOPHIGH 
+        jmp LOOPHIGH
+
+    ENDLOOPHIGH:
+endm
+
+getLess macro 
+    LOCAL LOOPLESS, ENDLOOPLESS, NOCAMBIARLESS
+
+    xor si, si
+    LOOPLESS: 
+        xor ax, ax
+        mov ax, arrOperacionesVal[si]
+
+        cmp ax, resMenor
+        jg NOCAMBIARLESS
+
+        mov resMenor, ax
+        NOCAMBIARLESS:
+        inc si
+        inc si
+        
+        cmp si, contadorOperacionVal
+        je ENDLOOPLESS 
+        jmp LOOPLESS
+
+    ENDLOOPLESS:
+endm
+
+getMedia macro
+    LOCAL LOOPMEDIA, ENDLOOPMEDIA
+    xor si, si
+    xor ax, ax
+
+    LOOPMEDIA:
+        mov ax, arrOperacionesVal[si]
+        add ax, resMedia
+        mov resMedia, ax
+        inc si
+        inc si
+        cmp si, contadorOperacionVal
+        je ENDLOOPMEDIA 
+        jmp LOOPMEDIA
+    ENDLOOPMEDIA:
+        xor bx, bx
+        xor ax, ax
+        mov ax, contadorOperacionVal
+        mov bx, 2
+        cwd
+        idiv bx
+
+        mov bx, ax
+        mov ax, resMedia
+        cwd
+        idiv bx
+        mov resMedia, ax
+endm
 ;-------------------------------------------------------------------------------------
 ; MACROS ALMACENAMIENTO
 ;-------------------------------------------------------------------------------------
