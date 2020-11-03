@@ -128,6 +128,7 @@ msM db 0ah,0dh, '   Resultado MEDIA: ', '$'
             clearString bufferContenidoJSON
 
             clearString auxiliar
+            clearString nameParent
             clearString arrOperacionesNom
             clearString arrOperacionesVal
             mov contadorOperacionNom, 0
